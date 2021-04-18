@@ -1,3 +1,12 @@
+# 0. server's functions
+
+| deployment | VM | ExposedIP | clusterIP | container's port |
+| --- | --- | --- | --- | --- |
+| nginx-test | minikube | 192.168.99.100 | don't care. resolved by dns | 80 | 
+| mongo-test | minikube-m03 | N/A | don't care. resolved by dns | 27017 | 
+| employee-test | minikube-m02 | N/A | don't care. resolved by dns | 5001 |
+
+
 # 1. Install each package at Ubuntu20.4
 ```
 <minikube>
