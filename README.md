@@ -548,3 +548,21 @@ $ kubectl create -f nginx_1.14.2_nodeSelector.yaml
 deployment.apps/nginx-test created
 
 ```
+
+# 11. Expose nginx's demployment. Acces the following URL from Host's blowser.
+```
+$ kubectl expose deployment nginx-test --type=LoadBalancer
+service/nginx-test exposed
+
+$ minikube service list
+|-------------|---------------|--------------|-----------------------------|
+|  NAMESPACE  |     NAME      | TARGET PORT  |             URL             |
+|-------------|---------------|--------------|-----------------------------|
+| default     | employee-test | No node port |
+| default     | kubernetes    | No node port |
+| default     | mongo-test    | No node port |
+| default     | nginx-test    |           80 | http://192.168.99.100:30025 |
+| kube-system | kube-dns      | No node port |
+|-------------|---------------|--------------|-----------------------------|
+
+```
