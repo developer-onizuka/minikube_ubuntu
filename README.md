@@ -171,3 +171,51 @@ Events:
   Normal  Created    8s    kubelet            Created container mongodb
   Normal  Started    8s    kubelet            Started container mongodb
 ```
+# 5. Expose mongo's deployment.
+```
+$ kubectl expose deployment mongo-test
+service/mongo-test exposed
+
+$ minikube service list
+|-------------|------------|--------------|-----|
+|  NAMESPACE  |    NAME    | TARGET PORT  | URL |
+|-------------|------------|--------------|-----|
+| default     | kubernetes | No node port |
+| default     | mongo-test | No node port |
+| kube-system | kube-dns   | No node port |
+|-------------|------------|--------------|-----|
+
+$ cat dnsutils_latest.yaml 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dnsutils
+  labels:
+    name: dnsutils
+spec:
+  containers:
+  - name: dnsutils
+    image: tutum/dnsutils
+    command:
+    - sleep
+    - "3600"
+
+$ kubectl create -f dnsutils_latest.yaml 
+pod/dnsutils created
+
+$ kubectl exec -it dnsutils -- /bin/sh
+# nslookup mongo-test
+Server:		10.96.0.10
+Address:	10.96.0.10#53
+
+Name:	mongo-test.default.svc.cluster.local
+Address: 10.110.22.192
+
+# apt-get update
+# apt install curl
+# curl 10.110.22.192:27017
+It looks like you are trying to access MongoDB over HTTP on the native driver port.
+
+# curl mongo-test:27017
+It looks like you are trying to access MongoDB over HTTP on the native driver port.
+```
