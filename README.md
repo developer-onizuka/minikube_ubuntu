@@ -219,3 +219,332 @@ It looks like you are trying to access MongoDB over HTTP on the native driver po
 # curl mongo-test:27017
 It looks like you are trying to access MongoDB over HTTP on the native driver port.
 ```
+
+# 6. Make employee's yaml file and run it. Check where the pod is running.
+```
+$ cat employee_latest_nodeSelector.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: employee-test
+spec:
+  selector:
+    matchLabels:
+      run: employee-test
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: employee-test
+    spec:
+      containers:
+      - name: employee
+        image: developeronizuka/employee
+        ports:
+        - containerPort: 5001
+        - containerPort: 5000
+        env:
+        - name: MONGO
+          value: mongo-test
+        command: ["/usr/local/dotnet/publish/Employee"]
+      nodeSelector:
+        location: telaviv
+
+$ kubectl describe pod employee-test
+Name:         employee-test-84b567445f-lmgf9
+Namespace:    default
+Priority:     0
+Node:         minikube-m02/192.168.99.101
+Start Time:   Sun, 18 Apr 2021 20:33:31 +0900
+Labels:       pod-template-hash=84b567445f
+              run=employee-test
+Annotations:  <none>
+Status:       Running
+IP:           10.244.1.4
+IPs:
+  IP:           10.244.1.4
+Controlled By:  ReplicaSet/employee-test-84b567445f
+Containers:
+  employee:
+    Container ID:  docker://83a72ed7c6bcbd220f89838064adf0270997b03ee89ecf2470410a7904c83036
+    Image:         developeronizuka/employee
+    Image ID:      docker-pullable://developeronizuka/employee@sha256:ad36f06fcb5aa8d4da7dc36ac9bf42223617c3330e8dfcaef1b5a30ba9f71084
+    Ports:         5001/TCP, 5000/TCP
+    Host Ports:    0/TCP, 0/TCP
+    Command:
+      /usr/local/dotnet/publish/Employee
+    State:          Running
+      Started:      Sun, 18 Apr 2021 20:35:15 +0900
+    Ready:          True
+    Restart Count:  0
+    Environment:
+      MONGO:  mongo-test
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-chlbn (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  default-token-chlbn:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-chlbn
+    Optional:    false
+QoS Class:       BestEffort
+Node-Selectors:  location=telaviv
+Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                 node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age    From               Message
+  ----    ------     ----   ----               -------
+  Normal  Scheduled  2m26s  default-scheduler  Successfully assigned default/employee-test-84b567445f-lmgf9 to minikube-m02
+  Normal  Pulling    2m25s  kubelet            Pulling image "developeronizuka/employee"
+  Normal  Pulled     42s    kubelet            Successfully pulled image "developeronizuka/employee" in 1m43.358795194s
+  Normal  Created    42s    kubelet            Created container employee
+  Normal  Started    42s    kubelet            Started container employee
+
+$ kubectl -it exec dnsutils -- /bin/sh
+# curl https://10.244.1.4:5001 -k
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title> - Employee</title>
+    <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" href="/">Employee</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="/">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="/Home/Privacy">Privacy</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            
+<h1>List of Employees</h1>
+
+<h2></h2>
+
+<a href="/Home/Insert"> Add New Employee</a>
+
+<br /><br />
+
+
+<table border="1" cellpadding="10">
+</table>
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2020 - Employee - <a href="/Home/Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script src="/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/site.js"></script>
+    
+</body>
+</html>
+```
+
+# 7. Expose employee's deployment.
+```
+$ kubectl expose deployment employee-test
+service/employee-test exposed
+
+$ minikube service list
+|-------------|---------------|--------------|-----|
+|  NAMESPACE  |     NAME      | TARGET PORT  | URL |
+|-------------|---------------|--------------|-----|
+| default     | employee-test | No node port |
+| default     | kubernetes    | No node port |
+| default     | mongo-test    | No node port |
+| kube-system | kube-dns      | No node port |
+|-------------|---------------|--------------|-----|
+```
+
+# 8. Check if it works correcly 
+```
+$ kubectl -it exec dnsutils -- /bin/sh
+# curl https://employee-test:5001 -k
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title> - Employee</title>
+    <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" href="/">Employee</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="/">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="/Home/Privacy">Privacy</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            
+<h1>List of Employees</h1>
+
+<h2></h2>
+
+<a href="/Home/Insert"> Add New Employee</a>
+
+<br /><br />
+
+
+<table border="1" cellpadding="10">
+</table>
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2020 - Employee - <a href="/Home/Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script src="/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/site.js"></script>
+    
+</body>
+</html>
+```
+# 9. Create the persistent volume and make nginx's config on it.
+```
+$ cat nginx-pv.yaml 
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: hostpath-pv
+spec:
+  storageClassName: standard
+  volumeMode: Filesystem
+  capacity:
+    storage: 1Gi
+  persistentVolumeReclaimPolicy: Retain
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/var/data"
+    type: DirectoryOrCreate
+
+$ cat nginx-pvc.yaml 
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hostpath-pvc
+spec:
+  storageClassName: standard
+  accessModes:
+  - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi
+
+$ ssh docker@192.168.99.100
+docker@192.168.99.100's password: tcuser
+
+$ cat /var/data/default.conf 
+upstream proxy.com {
+        server employee-test:5001;
+}
+
+server {
+        listen 80;
+        server_name localhost;
+        location / {
+                root /usr/share/nginx/html;
+                index index.html index.htm;
+                proxy_pass https://proxy.com;
+        }
+}
+
+```
+# 10. Make nginx's yaml file and run it. 
+```
+$ cat nginx_1.14.2_nodeSelector.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-test
+spec:
+  selector:
+    matchLabels:
+      run: nginx-test
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: nginx-test
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.14.2
+        volumeMounts:
+        - name: nginx-conf
+          mountPath: /etc/nginx/conf.d
+        ports:
+        - containerPort: 80
+      volumes:
+      - name: nginx-conf
+        persistentVolumeClaim:
+         claimName: hostpath-pvc
+      nodeSelector:
+        location: tokyo
+
+$ kubectl create -f nginx_1.14.2_nodeSelector.yaml 
+deployment.apps/nginx-test created
+
+```
