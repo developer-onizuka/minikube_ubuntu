@@ -259,6 +259,8 @@ spec:
       nodeSelector:
         location: telaviv
 
+$ kubectl create -f employee_latest_nodeSelector.yaml 
+
 $ kubectl describe pod employee-test
 Name:         employee-test-84b567445f-lmgf9
 Namespace:    default
