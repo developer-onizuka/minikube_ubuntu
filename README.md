@@ -560,7 +560,7 @@ deployment.apps/nginx-test created
 
 ```
 
-# 11. Expose nginx's demployment. Acces the following URL from Host's blowser.
+# 11. Expose nginx's demployment. Access the following URL from Host's blowser.
 ```
 $ kubectl expose deployment nginx-test --type=LoadBalancer
 service/nginx-test exposed
