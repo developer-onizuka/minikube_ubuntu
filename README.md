@@ -504,6 +504,9 @@ spec:
     requests:
       storage: 1Gi
 
+$ kubectl create -f nginx-pv.yaml 
+$ kubectl create -f nginx-pvc.yaml 
+  
 $ ssh docker@192.168.99.100
 docker@192.168.99.100's password: tcuser
 
