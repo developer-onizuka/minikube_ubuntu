@@ -580,3 +580,29 @@ $ minikube service list
 |-------------|---------------|--------------|-----------------------------|
 
 ```
+# 12. The status of All Pods (but clusterIP's are deferent from the above, because I took it from another tries.)
+```
+$ kubectl get all
+NAME                                 READY   STATUS    RESTARTS   AGE
+pod/dnsutils                         1/1     Running   1          78m
+pod/employee-test-84b567445f-5wb28   1/1     Running   0          71m
+pod/mongo-test-7c6f94fcc4-b6jq7      1/1     Running   0          83m
+pod/nginx-test-77889fd64-fct9m       1/1     Running   0          49m
+
+NAME                    TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)             AGE
+service/employee-test   ClusterIP      10.105.6.20      <none>        5001/TCP,5000/TCP   67m
+service/kubernetes      ClusterIP      10.96.0.1        <none>        443/TCP             88m
+service/mongo-test      ClusterIP      10.101.120.214   <none>        27017/TCP           80m
+service/nginx-test      LoadBalancer   10.107.107.112   <pending>     80:31238/TCP        48m
+
+NAME                            READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/employee-test   1/1     1            1           71m
+deployment.apps/mongo-test      1/1     1            1           83m
+deployment.apps/nginx-test      1/1     1            1           49m
+
+NAME                                       DESIRED   CURRENT   READY   AGE
+replicaset.apps/employee-test-84b567445f   1         1         1       71m
+replicaset.apps/mongo-test-7c6f94fcc4      1         1         1       83m
+replicaset.apps/nginx-test-77889fd64       1         1         1       49m
+
+```
